@@ -22,7 +22,9 @@ public class LoginManager : MonoBehaviour
     private FirebaseAuth auth;
     private FirebaseUser user;
     private GoogleSignInConfiguration config;
-    private string clientId = "901661532615-1l25n23p1ihk28r1ng5hd23d2q9vrcse.apps.googleusercontent.com";
+    
+    //the client id string ends with "...googleusercontent.com"
+    private string clientId = "enter your client auth id (type3) from googleservices.json file from firebase console.";
     public static bool GSignIn ;
     
     
@@ -41,13 +43,7 @@ public class LoginManager : MonoBehaviour
             { 
 
                 InitFireBase();
-    
-
-
-
-
-
-                // Set a flag here tase is ready to use by your app.
+            
             }
             else
             {
@@ -83,23 +79,20 @@ public class LoginManager : MonoBehaviour
     
         Debug.Log("listening for auth state changed");
        if (auth.CurrentUser != null)
-        {            Debug.Log("Auth.currentUser"+ auth.CurrentUser.Email);
+        {  
+            Debug.Log("Auth.currentUser"+ auth.CurrentUser.Email);
 
             SceneManager.LoadSceneAsync(LoadLevel);
+        }
 
-
-       }
-
-
-
-   }
+    }
 
 
 
    #region Signup
     public void signUp()
     {
-        //var auth = FirebaseAuth.DefaultInstance;
+        
         sign();
         
 
@@ -112,7 +105,8 @@ public class LoginManager : MonoBehaviour
        {
 
            if (task.IsCanceled)
-           {Debug.Log("canceled");
+           {
+               Debug.Log("canceled");
                return;
            }
 
@@ -125,14 +119,9 @@ public class LoginManager : MonoBehaviour
            //FIREBASE USER
 
             user = task.Result;
-           Debug.LogFormat("created user {0}({1})",user.Email,user.UserId);
+            Debug.LogFormat("created user {0}({1})",user.Email,user.UserId);
 
-
-
-
-
-
-       });
+    });
 
    }
 #endregion
@@ -143,7 +132,7 @@ public class LoginManager : MonoBehaviour
 
     public void SignInUser()
     {
-        //ar auth = FirebaseAuth.DefaultInstance;
+       
         SignIn();
 
 
@@ -152,7 +141,7 @@ public class LoginManager : MonoBehaviour
 
     void SignIn()
     {
-        FirebaseAuth.DefaultInstance.SignInWithEmailAndPasswordAsync(email.text, password.text).ContinueWithOnMainThread(task =>
+        FirebaseAuth.DefaultInstance.SignInWithEmailAndPasswordAsync(email.text,                 password.text).ContinueWithOnMainThread(task =>
         {
 
             if (task.IsCanceled)
@@ -165,11 +154,8 @@ public class LoginManager : MonoBehaviour
 
             user = task.Result;
             
-           // user = FirebaseAuth.DefaultInstance.CurrentUser; 
-
             Debug.LogFormat("the user signed in is {0},{1}",user.Email , user.UserId);
-           // user  = FirebaseAuth.DefaultInstance.CurrentUser;
-          //s  Debug.Log(user);
+          
               change();
 
         });
@@ -222,7 +208,12 @@ public class LoginManager : MonoBehaviour
     
     
         GoogleSignIn.DefaultInstance.SignIn().ContinueWithOnMainThread(OnAuth);
-        // GoogleSignIn.DefaultInstance.SignInSilently().ContinueWithOnMainThread(OnAuth);
+    
+    // NOTE :: SignSilently method below signs your in with any account pop up UI , like in the normal SignIn above
+    
+    
+    //to use this "SignInSilently" method ,COMMENT the above method and UNCOMMENT the below one.
+    // GoogleSignIn.DefaultInstance.SignInSilently().ContinueWithOnMainThread(OnAuth);
     
 
 
@@ -235,13 +226,14 @@ public class LoginManager : MonoBehaviour
     void OnAuth(Task<GoogleSignInUser>task)
     {
 
-        if (task.IsFaulted)
+        if (task.IsFaulted)     //when we click here , UI pops up ,and closes and wont open again unless we restart the app
+                                            // needs to be worked on !
         {Debug.Log("network issues");
             config = null;
         }
         else if (task.IsCanceled)
         {    Debug.Log("did not select a profile");
-            //config = null;
+            
         }
 
         else if (task.IsCompleted)
@@ -264,15 +256,14 @@ public class LoginManager : MonoBehaviour
                 GSignIn = true;
                     
                     user = task1.Result;
-
-
+                    // as soon as user gets assigned, the auth variable changes and control is shifted to the 
+                    // AuthStateChanged above,which debugs and returns the controls back here
+                    //so we can change scene here or when the control shifts
 
                     ChangeScene();
                 }
 
-
-
-            });
+             });
 
 
         }
