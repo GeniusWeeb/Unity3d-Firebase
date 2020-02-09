@@ -16,9 +16,9 @@ using Firebase.Unity.Editor;
 
 public class EditManager : MonoBehaviour
 {
-    // Start is called before the first frame update
+   
     
-    // UserProfile UserProfile.user = new UserProfile();   //creating object of user class
+  
     
     
     #region private_variables
@@ -47,6 +47,10 @@ public class EditManager : MonoBehaviour
     private string NextLevel = "Profile";
 
 #endregion
+
+
+
+//----------------------------
     private void Awake()
     {    
         auth = FirebaseAuth.DefaultInstance;
@@ -58,8 +62,12 @@ public class EditManager : MonoBehaviour
     private void Start()
     {
        
-        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://macbook-6af54.firebaseio.com/");
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("your firebase databse url here");
         
+        
+        //getting the database root reference i.e for ex  if ur url is : "...firebase.com/_root_"
+        //_root_ is the reference location we are assigning to this variable , then below we define 
+        //AppUsers at root
         dRef = FirebaseDatabase.DefaultInstance.RootReference;
         
 
@@ -68,7 +76,10 @@ public class EditManager : MonoBehaviour
 
 
     void InitUser()
-    {    
+    {    // storing the data from online authenetication object to a static UserProfile.cs file
+        //instead of using the auth object everywhere we would just use the UserProfile class members
+    
+    
         UserProfile.user.UserEmail = user.Email;
         UserProfile.user.UserName = user.DisplayName;
         UserProfile.user.UserId = user.UserId;
@@ -88,17 +99,29 @@ public class EditManager : MonoBehaviour
         Debug.Log("hi");
          text = data.text;
          UserProfile.user.UserMessage= text;
-         //  Debug.Log( GameManagerScript.Gm.UserProfile.user.UserEmail);
+        
         Debug.Log(UserProfile.user.UserMessage);
         Debug.Log(UserProfile.user.UserEmail);
-       // Debug.Log("New User's email is " +UserProfile.user2.UserEmail);
+     
 
 
 
          // perform Firebase functions here
 
          string json = JsonUtility.ToJson(UserProfile.user);
-
+        
+        
+        //AppUsers is the RootNode 
+        //+AppUsers---
+         //  +UserId(UID)
+          //     +UserName:
+          //     +UserEmail:
+          //     +UserId:
+          //     +UserPassword:
+          
+          // the below line creates the format as above from the "UserProfile.cs" Script, as we convert 
+          // the Script (C# object) into Json and send it to firebase.
+        
          dRef.Child("AppUsers").Child(user.UserId).SetRawJsonValueAsync(json).ContinueWithOnMainThread(task =>
          {
              if (task.IsCompleted)
@@ -108,7 +131,8 @@ public class EditManager : MonoBehaviour
 
          });
 
-
+        //SetRawJsonValueAsync overwritescomplete nodes 
+        //SetValueAsync updates a specific field without overwritting the entire object as shown below
 
 
 
@@ -119,17 +143,18 @@ public class EditManager : MonoBehaviour
     {
         UserProfile.user.UserName = Name.text;
         dRef.Child("AppUsers").Child(user.UserId).Child("UserName").SetValueAsync(UserProfile.user.UserName);
-   
+                                                    //it goes into the field "UserName" as sets it value to what we provide through
+                                                    //the game
 
     }
-
-
+    
+    //go Back
     public void BackScene()
     {
         SceneManager.LoadSceneAsync(BackLevel);
     }
 
-
+    //go and view profile
     public void check_profile()
     {
 
